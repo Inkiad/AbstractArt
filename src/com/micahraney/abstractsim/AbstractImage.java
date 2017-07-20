@@ -3,6 +3,7 @@ package com.micahraney.abstractsim;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Map;
+import java.util.Random;
 import java.util.prefs.Preferences;
 
 /**
@@ -13,19 +14,34 @@ import java.util.prefs.Preferences;
  */
 public class AbstractImage {    //algorithm properties
 
-    private int iterations, intricacy;
+    private int iterations = 100, intricacy = 3, cvariance = 10;
+    private long seed;
     private volatile int curIters = 0;
     private volatile boolean isRendered = false;
     private BufferedImage image;
 
-    public AbstractImage(Map<String, Integer> prefs) {
+    public AbstractImage(Map<String, Integer> prefs, long seed) {
         //load the preferences for the generation algorithm off the provided preferences object.
-        iterations = prefs.get("iterations");
-        intricacy = prefs.get("intricacy");
+        loadPrefereces(prefs);
+        this.seed = seed;
         //TODO: Add robust preference handling that can take an incomplete pref set using defaults.
 
 
-        image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
+        image = new BufferedImage(1200, 800, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    public void setSeed(long seed){
+        this.seed = seed;
+    }
+
+    public long getSeed(){
+        return seed;
+    }
+
+    public void loadPrefereces(Map<String, Integer> prefs) {
+        iterations = prefs.get("iterations");
+        intricacy = prefs.get("intricacy");
+        cvariance = prefs.get("cvariance");
     }
 
     public int getIterationCount() {
@@ -65,38 +81,62 @@ public class AbstractImage {    //algorithm properties
      */
     public void generateArt() {
 
+        Random rand = new Random(seed);
+
         //the image is no longer fully rendered.
         isRendered = false;
 
         //get image attributess and Graphics instance.
-        Graphics g = image.getGraphics();
+        Graphics gr = image.getGraphics();
         int x = image.getWidth(), y = image.getHeight();
 
         //clear the render
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, x, y);
+        gr.setColor(Color.WHITE);
+        gr.fillRect(0, 0, x, y);
 
-        //initialize the memory space for these randomizations.
-        int[] xpts = new int[intricacy], ypts = new int[intricacy];
+        //set the base color
+        int rbase = (int) (256 * rand.nextDouble()),
+                gbase = (int) (256 * rand.nextDouble()),
+                bbase = (int) (256 * rand.nextDouble());
+
+        //initialize the color variables
+        int r, g, b, a;
+
+        //find the color deltas
+        double rdelta = (rbase - (256 * rand.nextDouble())) / iterations,
+                gdelta = (gbase - (256 * rand.nextDouble())) / iterations,
+                bdelta = (bbase - (256 * rand.nextDouble())) / iterations;
+
+        //initialize the memory space for polygon point selection,
+        int[] xpts = new int[intricacy * iterations], ypts = new int[intricacy * iterations];
 
         System.out.println("Rendering...");
         for (curIters = 0; curIters < iterations; curIters++) {
             //TODO: implement art generation algorithm
 
             //generate a list of points of a random size within the memory space
-            int tr = (int)(Math.random()*intricacy);
-            for(int i = 0; i < tr; i++){
-                xpts[i] = (int)(Math.random()*x);
-                ypts[i] = (int)(Math.random()*y);
+//            int tr = (int)(rand.nextDouble()*intricacy);
+            int tr = (iterations - curIters) * intricacy;
+            for (int i = 0; i < tr; i++) {
+                xpts[i] = (int) (rand.nextDouble() * x);
+                ypts[i] = (int) (rand.nextDouble() * y);
             }
 
-            //generate random color
-            g.setColor(new Color((float) Math.random(),
-                    (float) Math.random(),
-                    (float) Math.random(),
-                    (float) Math.random()));
+            //generate random color from the base color, through the variance defined
+            r = (int) (rbase + rdelta * curIters + (rand.nextDouble() > 0.5 ? 1 : -1) * cvariance * rand.nextDouble());
+            g = (int) (gbase + gdelta * curIters + (rand.nextDouble() > 0.5 ? 1 : -1) * cvariance * rand.nextDouble());
+            b = (int) (bbase + bdelta * curIters + (rand.nextDouble() > 0.5 ? 1 : -1) * cvariance * rand.nextDouble());
+            a = (int) (256 * rand.nextDouble());
 
-            g.fillPolygon(xpts, ypts, tr);
+            //check that the color is in the range [0,255]
+            r = boundCheck(r);
+            g = boundCheck(g);
+            b = boundCheck(b);
+
+            //
+            gr.setColor(new Color(r, g, b, a));
+
+            gr.fillPolygon(xpts, ypts, tr);
 
             //notify all listeners of the rendering update.
             synchronized (this) {
@@ -112,6 +152,14 @@ public class AbstractImage {    //algorithm properties
             this.notifyAll();
         }
         //TODO: implement this.
+    }
+
+    private int boundCheck(int color) {
+        if (color > 255)
+            return 255;
+        else if (color < 0)
+            return 0;
+        return color;
     }
 
     /**

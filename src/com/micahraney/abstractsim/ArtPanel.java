@@ -16,7 +16,19 @@ public class ArtPanel extends JPanel {
     private AbstractImage image;
 
     public ArtPanel(Map<String, Integer> prefs) {
-        image = new AbstractImage(prefs);
+        image = new AbstractImage(prefs, 0);
+    }
+
+    public void loadPreferences(Map<String, Integer> prefs) {
+        image.loadPrefereces(prefs);
+    }
+
+    public void setSeed(long seed){
+        image.setSeed(seed);
+    }
+
+    public long getSeed(long seed){
+        return image.getSeed();
     }
 
     /**
@@ -43,7 +55,7 @@ public class ArtPanel extends JPanel {
         if ((float) dx / sx < (float) dy / sy) {
 
             //calculate the scaling as a float
-            float scale = (float)dx / sx;
+            float scale = (float) dx / sx;
 
             //find the height of the rendered image
             int effY = (int) (sy * scale);
@@ -68,7 +80,7 @@ public class ArtPanel extends JPanel {
 
 
             //calculate the scaling as a float
-            float scale = (float)dy / sy;
+            float scale = (float) dy / sy;
 
             //find the height of the rendered image
             int effX = (int) (sx * scale);
@@ -92,7 +104,7 @@ public class ArtPanel extends JPanel {
         System.out.println("Render complete?!");
     }
 
-    public Dimension getPreferredSize(){
+    public Dimension getPreferredSize() {
         Image img = getImage().getRender();
         return new Dimension(img.getWidth(null), img.getHeight(null));
     }
