@@ -1,5 +1,7 @@
 package com.micahraney.abstractsim;
 
+import sun.rmi.server.InactiveGroupException;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
@@ -9,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
+
+    private static JTextField iterationsField,  cvarianceField, seedField, intricacyField;
 
     public static void main(String[] args) {
 	// write your code here
@@ -34,21 +38,25 @@ public class Main {
         southPanel.setLayout(new BorderLayout());
 
         JPanel prefTable = new JPanel();
-        prefTable.setLayout(new GridLayout(3,2));
+        prefTable.setLayout(new GridLayout(4,2));
         prefTable.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
-        JTextField seedField = new JTextField();
-        prefTable.add(new JLabel("Seed:"),2,0);
-        prefTable.add(seedField,2,1);
+        seedField = new JTextField();
+        prefTable.add(new JLabel("Seed:"),3,0);
+        prefTable.add(seedField,3,1);
 
-        JTextField intricacyField = new JTextField();
-        prefTable.add(new JLabel("Intricacy:"),1,0);
-        prefTable.add(intricacyField,1,1);
+        intricacyField = new JTextField();
+        prefTable.add(new JLabel("Intricacy:"),2,0);
+        prefTable.add(intricacyField,2,1);
 
-        JTextField cvarianceField = new JTextField();
-        cvarianceField.setPreferredSize(new Dimension(150,10));
-        prefTable.add(new JLabel("Color Variance: "),0,0);
-        prefTable.add(cvarianceField,0,1);
+        cvarianceField = new JTextField();
+        prefTable.add(new JLabel("Color Variance: "),1,0);
+        prefTable.add(cvarianceField,1,1);
+
+        iterationsField= new JTextField();
+        iterationsField.setPreferredSize(new Dimension(150,10));
+        prefTable.add(new JLabel("Iterations: "),0,0);
+        prefTable.add(iterationsField,0,1);
 
         southPanel.add(prefTable, BorderLayout.WEST);
 
@@ -76,6 +84,7 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
 
+                //parse the seed
                 long seed;
                 if(seedField.getText().isEmpty()) {
                     seed = System.currentTimeMillis();
@@ -85,6 +94,14 @@ public class Main {
                     seed = seedField.getText().hashCode();
                 }
                 artPanel.setSeed(seed);
+                Map<String,Integer> prefs = loadUIPreferences();
+                if(prefs == null){
+                    JOptionPane.showMessageDialog(frame,"All render options (except seed) must be\n" +
+                            "integers (whole numbers)! Cannot process.","Render Error!",JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                //prefs must be good.
+                artPanel.loadPreferences(prefs);
                 (new Thread(new RenderTask(artPanel, true, frame))).start();
             }
         });
@@ -92,7 +109,37 @@ public class Main {
 
 
         frame.add(southPanel,BorderLayout.SOUTH);
+        showUIPreferences(prefs);
         frame.pack();
         frame.setVisible(true);
     }
+
+    private static Map<String, Integer> loadUIPreferences(){
+        int iterations, intricacy, cvariance;
+        try{
+            iterations = Integer.parseInt(iterationsField.getText());
+            intricacy = Integer.parseInt(intricacyField.getText());
+            cvariance = Integer.parseInt(cvarianceField.getText());
+        }
+        catch(NumberFormatException e){
+            return null;
+        }
+
+        //initialize prefs
+        Map<String,Integer> prefs = new HashMap<>();
+        prefs.put("iterations",iterations);
+        prefs.put("intricacy", intricacy);
+        prefs.put("cvariance", cvariance);
+
+        return prefs;
+    }
+    private static void showUIPreferences(Map<String, Integer> prefs){
+
+        //initialize ArtPanel
+        iterationsField.setText(""+prefs.get("iterations"));
+        intricacyField.setText(""+prefs.get("intricacy"));
+        cvarianceField.setText(""+prefs.get("cvariance"));
+
+    }
+
 }
