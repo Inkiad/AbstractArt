@@ -62,15 +62,15 @@ public class ArtPanel extends JPanel {
 
             //calculate how far down to start the image render
             int borderY = (dy - effY) / 2;
-
-            System.out.println("Rendering with width constraint... " +
-                    "\n\tsx: " + sx +
-                    "\n\tsy: " + sy +
-                    "\n\tdx: " + dx +
-                    "\n\tdy: " + dy +
-                    "\n\tscale: " + scale +
-                    "\n\teffY: " + effY +
-                    "\n\tborderY: " + borderY);
+//
+//            System.out.println("Rendering with width constraint... " +
+//                    "\n\tsx: " + sx +
+//                    "\n\tsy: " + sy +
+//                    "\n\tdx: " + dx +
+//                    "\n\tdy: " + dy +
+//                    "\n\tscale: " + scale +
+//                    "\n\teffY: " + effY +
+//                    "\n\tborderY: " + borderY);
 
             g.drawImage(img, 0, borderY, dx, dy - borderY, 0, 0, sx, sy, null);
 
@@ -88,14 +88,14 @@ public class ArtPanel extends JPanel {
             //calculate how far down to start the image render
             int borderX = (dx - effX) / 2;
 
-            System.out.println("Rendering with height constraint... " +
-                    "\n\tsx: " + sx +
-                    "\n\tsy: " + sy +
-                    "\n\tdx: " + dx +
-                    "\n\tdy: " + dy +
-                    "\n\tscale: " + scale +
-                    "\n\teffX: " + effX +
-                    "\n\tborderX: " + borderX);
+//            System.out.println("Rendering with height constraint... " +
+//                    "\n\tsx: " + sx +
+//                    "\n\tsy: " + sy +
+//                    "\n\tdx: " + dx +
+//                    "\n\tdy: " + dy +
+//                    "\n\tscale: " + scale +
+//                    "\n\teffX: " + effX +
+//                    "\n\tborderX: " + borderX);
 
             g.drawImage(img, borderX, 0, dx - borderX, dy, 0, 0, sx, sy, null);
 

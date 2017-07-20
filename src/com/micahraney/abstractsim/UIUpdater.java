@@ -21,6 +21,7 @@ public class UIUpdater extends Thread {
                 synchronized (artImage) {
                     artImage.wait();
                 }
+                parent.repaint();
                 progressMonitor.setProgress(artImage.getIterationProgress());
             }
         } catch (InterruptedException ex) {
