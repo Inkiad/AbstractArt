@@ -27,7 +27,7 @@ public class AbstractImage {    //algorithm properties
         //TODO: Add robust preference handling that can take an incomplete pref set using defaults.
 
 
-        image = new BufferedImage(1200, 800, BufferedImage.TYPE_INT_ARGB);
+        image = new BufferedImage(1280, 720, BufferedImage.TYPE_INT_ARGB);
     }
 
     public void setSeed(long seed){

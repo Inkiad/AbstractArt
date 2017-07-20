@@ -7,6 +7,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,8 +76,27 @@ public class Main {
             }
         });
         buttonPanel.add(randomButton);
-        buttonPanel.add(new JButton("Save"));
+
+        JButton saveButton = new JButton("Save");
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                fc.setSelectedFile(new File(System.getProperty("user.dir")));
+                if(fc.showSaveDialog(frame)!=JFileChooser.APPROVE_OPTION)
+                    return;
+                fc.setDialogTitle("Select Export Location");
+                File of = fc.getSelectedFile();
+
+                if(of == null)
+                    return;//no file selected
+
+                (new Thread(new ExportTask(artPanel,3840, 2160, of))).start();
+            }
+        });
+        buttonPanel.add(saveButton);
         southPanel.add(buttonPanel, BorderLayout.EAST);
+
 
         //initialize render button
         JButton button = new JButton("Render");
