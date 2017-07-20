@@ -73,13 +73,17 @@ public class AbstractImage {    //algorithm properties
         return image;
     }
 
+    public void generateArt(){
+        generateArt(image);
+    }
+
     /**
      * Queues the art generation on the image. After each iteration, .notifyAll() will be called on this object
      * to notify any GUI listeners on the progress of the rendering.
      * <p>
      * WARNING: Do NOT call on the GUI thread, will likely cause UI freezes!
      */
-    public void generateArt() {
+    public void generateArt(BufferedImage img) {
 
         Random rand = new Random(seed);
 
@@ -87,8 +91,8 @@ public class AbstractImage {    //algorithm properties
         isRendered = false;
 
         //get image attributess and Graphics instance.
-        Graphics gr = image.getGraphics();
-        int x = image.getWidth(), y = image.getHeight();
+        Graphics gr = img.getGraphics();
+        int x = img.getWidth(), y = img.getHeight();
 
         //clear the render
         gr.setColor(Color.WHITE);
